@@ -34,6 +34,7 @@ class CorefModel(object):
     self.lm_layers = self.config["lm_layers"]
     self.lm_size = self.config["lm_size"]
     self.eval_data = None # Load eval data lazily.
+    self.top_antecedent_scores = None
 
     input_props = []
     input_props.append((tf.string, [None, None])) # Tokens.
@@ -336,7 +337,7 @@ class CorefModel(object):
           top_span_emb = f * attended_span_emb + (1 - f) * top_span_emb # [k, emb]
 
     top_antecedent_scores = tf.concat([dummy_scores, top_antecedent_scores], 1) # [k, c + 1]
-
+    
     top_antecedent_cluster_ids = tf.gather(top_span_cluster_ids, top_antecedents) # [k, c]
     top_antecedent_cluster_ids += tf.to_int32(tf.log(tf.to_float(top_antecedents_mask))) # [k, c]
     same_cluster_indicator = tf.equal(top_antecedent_cluster_ids, tf.expand_dims(top_span_cluster_ids, 1)) # [k, c]
@@ -345,6 +346,9 @@ class CorefModel(object):
     dummy_labels = tf.logical_not(tf.reduce_any(pairwise_labels, 1, keepdims=True)) # [k, 1]
     top_antecedent_labels = tf.concat([dummy_labels, pairwise_labels], 1) # [k, c + 1]
     loss = self.softmax_loss(top_antecedent_scores, top_antecedent_labels) # [k]
+
+    self.top_antecedent_scores = tf.where(top_antecedent_labels)[:, 1] 
+
     loss = tf.reduce_sum(loss) # []
 
     return [candidate_starts, candidate_ends, candidate_mention_scores, top_span_starts, top_span_ends, top_antecedents, top_antecedent_scores], loss
@@ -388,6 +392,7 @@ class CorefModel(object):
 
   def softmax_loss(self, antecedent_scores, antecedent_labels):
     gold_scores = antecedent_scores + tf.log(tf.to_float(antecedent_labels)) # [k, max_ant + 1]
+    print('antecedent_labels', antecedent_labels)
     marginalized_gold_scores = tf.reduce_logsumexp(gold_scores, [1]) # [k]
     log_norm = tf.reduce_logsumexp(antecedent_scores, [1]) # [k]
     return log_norm - marginalized_gold_scores # [k]
