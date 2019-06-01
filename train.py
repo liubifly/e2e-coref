@@ -36,9 +36,11 @@ if __name__ == "__main__":
 
     initial_time = time.time()
     while True:
-      tf_loss, tf_global_step, _, tf_antecedent_scores = session.run([model.loss, model.global_step, model.train_op, model.top_antecedent_scores])
+      tf_loss, tf_global_step, _, tf_starts, tf_tmp = session.run([model.loss, model.global_step, model.train_op, model.starts,
+                                                                   model.tmp])
       accumulated_loss += tf_loss
-      print('top_antecedent_scores', tf_antecedent_scores)
+      print('starts_shape', tf_starts.shape)
+      print('tmp_shape', tf_tmp.shape)
 
       if tf_global_step % report_frequency == 0:
         total_time = time.time() - initial_time

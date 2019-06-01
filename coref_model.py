@@ -34,7 +34,8 @@ class CorefModel(object):
     self.lm_layers = self.config["lm_layers"]
     self.lm_size = self.config["lm_size"]
     self.eval_data = None # Load eval data lazily.
-    self.top_antecedent_scores = None
+    self.starts = None
+    self.tmp = None
 
     input_props = []
     input_props.append((tf.string, [None, None])) # Tokens.
@@ -296,8 +297,9 @@ class CorefModel(object):
     candidate_cluster_ids = self.get_candidate_labels(candidate_starts, candidate_ends, gold_starts, gold_ends, cluster_ids) # [num_candidates]
 
     candidate_span_emb = self.get_span_emb(flattened_head_emb, context_outputs, candidate_starts, candidate_ends) # [num_candidates, emb]
-    candidate_mention_scores =  self.get_mention_scores(candidate_span_emb) # [k, 1]
+    candidate_mention_scores = self.get_mention_scores(candidate_span_emb) # [k, 1]
     candidate_mention_scores = tf.squeeze(candidate_mention_scores, 1) # [k]
+    self.starts = candidate_span_emb
 
     k = tf.to_int32(tf.floor(tf.to_float(tf.shape(context_outputs)[0]) * self.config["top_span_ratio"]))
     top_span_indices = coref_ops.extract_spans(tf.expand_dims(candidate_mention_scores, 0),
@@ -306,6 +308,7 @@ class CorefModel(object):
                                                tf.expand_dims(k, 0),
                                                util.shape(context_outputs, 0),
                                                True) # [1, k]
+    self.tmp = top_span_indices
     top_span_indices.set_shape([1, None])
     top_span_indices = tf.squeeze(top_span_indices, 0) # [k]
 
@@ -346,8 +349,6 @@ class CorefModel(object):
     dummy_labels = tf.logical_not(tf.reduce_any(pairwise_labels, 1, keepdims=True)) # [k, 1]
     top_antecedent_labels = tf.concat([dummy_labels, pairwise_labels], 1) # [k, c + 1]
     loss = self.softmax_loss(top_antecedent_scores, top_antecedent_labels) # [k]
-
-    self.top_antecedent_scores = tf.where(top_antecedent_labels)[:, 1] 
 
     loss = tf.reduce_sum(loss) # []
 
@@ -392,7 +393,6 @@ class CorefModel(object):
 
   def softmax_loss(self, antecedent_scores, antecedent_labels):
     gold_scores = antecedent_scores + tf.log(tf.to_float(antecedent_labels)) # [k, max_ant + 1]
-    print('antecedent_labels', antecedent_labels)
     marginalized_gold_scores = tf.reduce_logsumexp(gold_scores, [1]) # [k]
     log_norm = tf.reduce_logsumexp(antecedent_scores, [1]) # [k]
     return log_norm - marginalized_gold_scores # [k]
