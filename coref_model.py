@@ -34,8 +34,8 @@ class CorefModel(object):
     self.lm_layers = self.config["lm_layers"]
     self.lm_size = self.config["lm_size"]
     self.eval_data = None # Load eval data lazily.
-    self.starts = None
     self.tmp = None
+    self.tmp2 = None
 
     input_props = []
     input_props.append((tf.string, [None, None])) # Tokens.
@@ -299,7 +299,6 @@ class CorefModel(object):
     candidate_span_emb = self.get_span_emb(flattened_head_emb, context_outputs, candidate_starts, candidate_ends) # [num_candidates, emb]
     candidate_mention_scores = self.get_mention_scores(candidate_span_emb) # [k, 1]
     candidate_mention_scores = tf.squeeze(candidate_mention_scores, 1) # [k]
-    self.starts = candidate_span_emb
 
     k = tf.to_int32(tf.floor(tf.to_float(tf.shape(context_outputs)[0]) * self.config["top_span_ratio"]))
     top_span_indices = coref_ops.extract_spans(tf.expand_dims(candidate_mention_scores, 0),
@@ -309,6 +308,7 @@ class CorefModel(object):
                                                util.shape(context_outputs, 0),
                                                True) # [1, k]
     self.tmp = top_span_indices
+    self.tmp2 = context_outputs
     top_span_indices.set_shape([1, None])
     top_span_indices = tf.squeeze(top_span_indices, 0) # [k]
 
