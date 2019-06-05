@@ -57,7 +57,8 @@ class CorefModel(object):
     self.enqueue_op = queue.enqueue(self.queue_input_tensors)
     self.input_tensors = queue.dequeue()
 
-    self.predictions, self.loss = self.get_predictions_and_loss(*self.input_tensors)
+    self.output = self.get_predictions_and_loss(*self.input_tensors)
+    self.predictions, self.loss = self.output
     self.global_step = tf.Variable(0, name="global_step", trainable=False)
     self.reset_global_step = tf.assign(self.global_step, 0)
     learning_rate = tf.train.exponential_decay(self.config["learning_rate"], self.global_step,
@@ -554,7 +555,7 @@ class CorefModel(object):
     for example_num, (tensorized_example, example) in enumerate(self.eval_data):
       _, _, _, _, _, _, _, _, _, gold_starts, gold_ends, _ = tensorized_example
       feed_dict = {i:t for i,t in zip(self.input_tensors, tensorized_example)}
-      candidate_starts, candidate_ends, candidate_mention_scores, top_span_starts, top_span_ends, top_antecedents, top_antecedent_scores, loss = session.run(self.predictions, self.loss, feed_dict=feed_dict)
+      candidate_starts, candidate_ends, candidate_mention_scores, top_span_starts, top_span_ends, top_antecedents, top_antecedent_scores, loss = session.run(self.output, feed_dict=feed_dict)
       print('loss', loss)
       predicted_antecedents = self.get_predicted_antecedents(top_antecedents, top_antecedent_scores)
       coref_predictions[example["doc_key"]] = self.evaluate_coref(top_span_starts, top_span_ends, predicted_antecedents, example["clusters"], coref_evaluator)
