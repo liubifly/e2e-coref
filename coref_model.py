@@ -554,7 +554,8 @@ class CorefModel(object):
     for example_num, (tensorized_example, example) in enumerate(self.eval_data):
       _, _, _, _, _, _, _, _, _, gold_starts, gold_ends, _ = tensorized_example
       feed_dict = {i:t for i,t in zip(self.input_tensors, tensorized_example)}
-      candidate_starts, candidate_ends, candidate_mention_scores, top_span_starts, top_span_ends, top_antecedents, top_antecedent_scores = session.run(self.predictions, feed_dict=feed_dict)
+      candidate_starts, candidate_ends, candidate_mention_scores, top_span_starts, top_span_ends, top_antecedents, top_antecedent_scores, loss = session.run(self.predictions, self.loss, feed_dict=feed_dict)
+      print('loss', loss)
       predicted_antecedents = self.get_predicted_antecedents(top_antecedents, top_antecedent_scores)
       coref_predictions[example["doc_key"]] = self.evaluate_coref(top_span_starts, top_span_ends, predicted_antecedents, example["clusters"], coref_evaluator)
       if example_num % 10 == 0:
