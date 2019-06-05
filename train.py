@@ -39,8 +39,6 @@ if __name__ == "__main__":
       tf_loss, tf_global_step, _, tf_tmp, tf_tmp2 = session.run([model.loss, model.global_step, model.train_op, model.tmp,
                                                                    model.tmp2])
       accumulated_loss += tf_loss
-      print('mask', tf_tmp)
-      print('id', tf_tmp2)
 
       if tf_global_step % report_frequency == 0:
         total_time = time.time() - initial_time
