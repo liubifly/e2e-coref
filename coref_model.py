@@ -311,6 +311,8 @@ class CorefModel(object):
     top_span_indices.set_shape([1, None])
     top_span_indices = tf.squeeze(top_span_indices, 0) # [k]
 
+    self.tmp = top_span_indices
+
     top_span_starts = tf.gather(candidate_starts, top_span_indices) # [k]
     top_span_ends = tf.gather(candidate_ends, top_span_indices) # [k]
     top_span_emb = tf.gather(candidate_span_emb, top_span_indices) # [k, emb]
@@ -342,8 +344,6 @@ class CorefModel(object):
     
     top_antecedent_cluster_ids = tf.gather(top_span_cluster_ids, top_antecedents) # [k, c]
     top_antecedent_cluster_ids += tf.to_int32(tf.log(tf.to_float(top_antecedents_mask))) # [k, c]
-    self.tmp = tf.to_int32(tf.log(tf.to_float(top_antecedents_mask))) # [k, c]
-    self.tmp2 = top_antecedent_cluster_ids
     same_cluster_indicator = tf.equal(top_antecedent_cluster_ids, tf.expand_dims(top_span_cluster_ids, 1)) # [k, c]
     non_dummy_indicator = tf.expand_dims(top_span_cluster_ids > 0, 1) # [k, 1]
     pairwise_labels = tf.logical_and(same_cluster_indicator, non_dummy_indicator) # [k, c]

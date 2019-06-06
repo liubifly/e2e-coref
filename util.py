@@ -16,6 +16,8 @@ import tensorflow as tf
 import pyhocon
 
 
+tf.nn.rnn_cell.LSTMCell
+
 def initialize_from_env():
   if "GPU" in os.environ:
     set_gpus(int(os.environ["GPU"]))
