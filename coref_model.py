@@ -238,9 +238,6 @@ class CorefModel(object):
     num_sentences = tf.shape(context_word_emb)[0]
     max_sentence_length = tf.shape(context_word_emb)[1]
 
-    print('num_senteces', num_sentences)
-    print('max_sentence_length', max_sentence_length)
-
     context_emb_list = [context_word_emb]
     head_emb_list = [head_word_emb]
 
@@ -317,8 +314,6 @@ class CorefModel(object):
                                                True) # [1, k]
     top_span_indices.set_shape([1, None])
     top_span_indices = tf.squeeze(top_span_indices, 0) # [k]
-
-    print('top_span_indices', top_span_indices.shape)
 
     top_span_starts = tf.gather(candidate_starts, top_span_indices) # [k]
     top_span_ends = tf.gather(candidate_ends, top_span_indices) # [k]
