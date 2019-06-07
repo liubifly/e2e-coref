@@ -238,6 +238,9 @@ class CorefModel(object):
     num_sentences = tf.shape(context_word_emb)[0]
     max_sentence_length = tf.shape(context_word_emb)[1]
 
+    print('num_senteces', num_sentences)
+    print('max_sentence_length', max_sentence_length)
+
     context_emb_list = [context_word_emb]
     head_emb_list = [head_word_emb]
 
@@ -298,7 +301,11 @@ class CorefModel(object):
     candidate_cluster_ids = self.get_candidate_labels(candidate_starts, candidate_ends, gold_starts, gold_ends, cluster_ids) # [num_candidates]
 
     candidate_span_emb = self.get_span_emb(flattened_head_emb, context_outputs, candidate_starts, candidate_ends) # [num_candidates, emb]
+    self.tmp = candidate_span_emb
+
     candidate_mention_scores = self.get_mention_scores(candidate_span_emb) # [k, 1]
+    self.tmp2 = candidate_mention_scores
+
     candidate_mention_scores = tf.squeeze(candidate_mention_scores, 1) # [k]
 
     k = tf.to_int32(tf.floor(tf.to_float(tf.shape(context_outputs)[0]) * self.config["top_span_ratio"]))
@@ -311,7 +318,7 @@ class CorefModel(object):
     top_span_indices.set_shape([1, None])
     top_span_indices = tf.squeeze(top_span_indices, 0) # [k]
 
-    self.tmp = top_span_indices
+    print('top_span_indices', top_span_indices.shape)
 
     top_span_starts = tf.gather(candidate_starts, top_span_indices) # [k]
     top_span_ends = tf.gather(candidate_ends, top_span_indices) # [k]
