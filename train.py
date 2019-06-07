@@ -40,14 +40,12 @@ if __name__ == "__main__":
                                                                    model.tmp2])
       accumulated_loss += tf_loss
 
-      print('top_span_indices', tf_tmp)
-
       if tf_global_step % report_frequency == 0:
         total_time = time.time() - initial_time
         steps_per_second = tf_global_step / total_time
 
         average_loss = accumulated_loss / report_frequency
-        print("[{}] loss={:.2f}, steps/s={:.2f}".format(tf_global_step, tf_loss, steps_per_second))
+        print("[{}] loss={:.2f}, steps/s={:.2f}".format(tf_global_step, average_loss, steps_per_second))
         writer.add_summary(util.make_summary({"loss": average_loss}), tf_global_step)
         accumulated_loss = 0.0
 
