@@ -14,7 +14,7 @@ if __name__ == "__main__":
 
   model = cm.CorefModel(config)
 
-  input_filename = 'dev.english.jsonline'
+  input_filename = 'dev.english.jsonlines'
 
   with tf.Session() as session:
     model.restore(session)
