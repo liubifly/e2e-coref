@@ -25,7 +25,9 @@ if __name__ == "__main__":
         tensorized_example = model.tensorize_example(example, is_training=False)
         feed_dict = {i:t for i,t in zip(model.input_tensors, tensorized_example)}
         _, _, _, top_span_starts, top_span_ends, top_antecedents, top_antecedent_scores = session.run(model.predictions, feed_dict=feed_dict)
+        print('top_antecedents', top_antecedents)
         predicted_antecedents = model.get_predicted_antecedents(top_antecedents, top_antecedent_scores)
+        print('antecedents', predicted_antecedents)
         example["predicted_clusters"], _ = model.get_predicted_clusters(top_span_starts, top_span_ends, predicted_antecedents)
-        print(example['predicted_clusters'])
-
+        print('clusters', example['predicted_clusters'])
+        break
