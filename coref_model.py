@@ -249,29 +249,29 @@ class CorefModel(object):
       context_emb_list.append(aggregated_char_emb)
       head_emb_list.append(aggregated_char_emb)
 
-    if not self.lm_file:
-      elmo_module = hub.Module("https://tfhub.dev/google/elmo/2")
-      lm_embeddings = elmo_module(
-          inputs={"tokens": tokens, "sequence_len": text_len},
-          signature="tokens", as_dict=True)
-      word_emb = lm_embeddings["word_emb"]  # [num_sentences, max_sentence_length, 512]
-      lm_emb = tf.stack([tf.concat([word_emb, word_emb], -1),
-                         lm_embeddings["lstm_outputs1"],
-                         lm_embeddings["lstm_outputs2"]], -1)  # [num_sentences, max_sentence_length, 1024, 3]
-    lm_emb_size = util.shape(lm_emb, 2)
-    lm_num_layers = util.shape(lm_emb, 3)
-    with tf.variable_scope("lm_aggregation"):
-      self.lm_weights = tf.nn.softmax(tf.get_variable("lm_scores", [lm_num_layers], initializer=tf.constant_initializer(0.0)))
-      self.lm_scaling = tf.get_variable("lm_scaling", [], initializer=tf.constant_initializer(1.0))
-    flattened_lm_emb = tf.reshape(lm_emb, [num_sentences * max_sentence_length * lm_emb_size, lm_num_layers])
-    flattened_aggregated_lm_emb = tf.matmul(flattened_lm_emb, tf.expand_dims(self.lm_weights, 1)) # [num_sentences * max_sentence_length * emb, 1]
-    aggregated_lm_emb = tf.reshape(flattened_aggregated_lm_emb, [num_sentences, max_sentence_length, lm_emb_size])
-    aggregated_lm_emb *= self.lm_scaling
-
-    self.tmp = aggregated_lm_emb
-    context_emb_list.append(aggregated_lm_emb)
+    # if not self.lm_file:
+    #   elmo_module = hub.Module("https://tfhub.dev/google/elmo/2")
+    #   lm_embeddings = elmo_module(
+    #       inputs={"tokens": tokens, "sequence_len": text_len},
+    #       signature="tokens", as_dict=True)
+    #   word_emb = lm_embeddings["word_emb"]  # [num_sentences, max_sentence_length, 512]
+    #   lm_emb = tf.stack([tf.concat([word_emb, word_emb], -1),
+    #                      lm_embeddings["lstm_outputs1"],
+    #                      lm_embeddings["lstm_outputs2"]], -1)  # [num_sentences, max_sentence_length, 1024, 3]
+    # lm_emb_size = util.shape(lm_emb, 2)
+    # lm_num_layers = util.shape(lm_emb, 3)
+    # with tf.variable_scope("lm_aggregation"):
+    #   self.lm_weights = tf.nn.softmax(tf.get_variable("lm_scores", [lm_num_layers], initializer=tf.constant_initializer(0.0)))
+    #   self.lm_scaling = tf.get_variable("lm_scaling", [], initializer=tf.constant_initializer(1.0))
+    # flattened_lm_emb = tf.reshape(lm_emb, [num_sentences * max_sentence_length * lm_emb_size, lm_num_layers])
+    # flattened_aggregated_lm_emb = tf.matmul(flattened_lm_emb, tf.expand_dims(self.lm_weights, 1)) # [num_sentences * max_sentence_length * emb, 1]
+    # aggregated_lm_emb = tf.reshape(flattened_aggregated_lm_emb, [num_sentences, max_sentence_length, lm_emb_size])
+    # aggregated_lm_emb *= self.lm_scaling
+    #
+    # context_emb_list.append(aggregated_lm_emb)
 
     context_emb = tf.concat(context_emb_list, 2) # [num_sentences, max_sentence_length, emb]
+    self.tmp = context_emb
     self.tmp2 = context_emb
     head_emb = tf.concat(head_emb_list, 2) # [num_sentences, max_sentence_length, emb]
     context_emb = tf.nn.dropout(context_emb, self.lexical_dropout) # [num_sentences, max_sentence_length, emb]
