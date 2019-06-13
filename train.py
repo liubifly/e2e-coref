@@ -40,8 +40,6 @@ if __name__ == "__main__":
                                                                    model.tmp2])
       accumulated_loss += tf_loss
 
-      print('tmp', tf_tmp.shape)
-
       if tf_global_step % report_frequency == 0:
         total_time = time.time() - initial_time
         steps_per_second = tf_global_step / total_time
