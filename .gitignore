@@ -10,3 +10,4 @@ glove*.txt.filtered
 *.hdf5
 venv
 .idea
+experiments.conf
