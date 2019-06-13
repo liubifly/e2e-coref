@@ -269,7 +269,7 @@ class CorefModel(object):
     aggregated_lm_emb *= self.lm_scaling
 
     self.tmp = aggregated_lm_emb
-    self.tmp2 = context_emb
+    self.tmp2 = context_word_emb
     context_emb_list.append(aggregated_lm_emb)
 
     context_emb = tf.concat(context_emb_list, 2) # [num_sentences, max_sentence_length, emb]
