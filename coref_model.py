@@ -269,6 +269,7 @@ class CorefModel(object):
     aggregated_lm_emb *= self.lm_scaling
 
     self.tmp = aggregated_lm_emb
+    self.tmp2 = context_emb
     context_emb_list.append(aggregated_lm_emb)
 
     context_emb = tf.concat(context_emb_list, 2) # [num_sentences, max_sentence_length, emb]
@@ -302,7 +303,6 @@ class CorefModel(object):
     candidate_span_emb = self.get_span_emb(flattened_head_emb, context_outputs, candidate_starts, candidate_ends) # [num_candidates, emb]
 
     candidate_mention_scores = self.get_mention_scores(candidate_span_emb) # [k, 1]
-    self.tmp2 = candidate_mention_scores
 
     candidate_mention_scores = tf.squeeze(candidate_mention_scores, 1) # [k]
 
