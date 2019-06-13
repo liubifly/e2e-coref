@@ -269,10 +269,10 @@ class CorefModel(object):
     aggregated_lm_emb *= self.lm_scaling
 
     self.tmp = aggregated_lm_emb
-    self.tmp2 = context_word_emb
     context_emb_list.append(aggregated_lm_emb)
 
     context_emb = tf.concat(context_emb_list, 2) # [num_sentences, max_sentence_length, emb]
+    self.tmp2 = context_emb
     head_emb = tf.concat(head_emb_list, 2) # [num_sentences, max_sentence_length, emb]
     context_emb = tf.nn.dropout(context_emb, self.lexical_dropout) # [num_sentences, max_sentence_length, emb]
     head_emb = tf.nn.dropout(head_emb, self.lexical_dropout) # [num_sentences, max_sentence_length, emb]
