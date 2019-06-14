@@ -271,7 +271,6 @@ class CorefModel(object):
     # context_emb_list.append(aggregated_lm_emb)
 
     context_emb = tf.concat(context_emb_list, 2) # [num_sentences, max_sentence_length, emb]
-    self.tmp = context_emb
     self.tmp2 = context_emb
     head_emb = tf.concat(head_emb_list, 2) # [num_sentences, max_sentence_length, emb]
     context_emb = tf.nn.dropout(context_emb, self.lexical_dropout) # [num_sentences, max_sentence_length, emb]
@@ -301,6 +300,8 @@ class CorefModel(object):
     candidate_cluster_ids = self.get_candidate_labels(candidate_starts, candidate_ends, gold_starts, gold_ends, cluster_ids) # [num_candidates]
 
     candidate_span_emb = self.get_span_emb(flattened_head_emb, context_outputs, candidate_starts, candidate_ends) # [num_candidates, emb]
+
+    self.tmp = candidate_span_emb
 
     candidate_mention_scores = self.get_mention_scores(candidate_span_emb) # [k, 1]
 
