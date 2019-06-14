@@ -271,7 +271,6 @@ class CorefModel(object):
     # context_emb_list.append(aggregated_lm_emb)
 
     context_emb = tf.concat(context_emb_list, 2) # [num_sentences, max_sentence_length, emb]
-    self.tmp2 = context_emb
     head_emb = tf.concat(head_emb_list, 2) # [num_sentences, max_sentence_length, emb]
     context_emb = tf.nn.dropout(context_emb, self.lexical_dropout) # [num_sentences, max_sentence_length, emb]
     head_emb = tf.nn.dropout(head_emb, self.lexical_dropout) # [num_sentences, max_sentence_length, emb]
@@ -440,6 +439,8 @@ class CorefModel(object):
     target_emb = tf.tile(target_emb, [1, c, 1]) # [k, c, emb]
 
     pair_emb = tf.concat([target_emb, top_antecedent_emb, similarity_emb, feature_emb], 2) # [k, c, emb]
+
+    self.tmp2 = pair_emb
 
     with tf.variable_scope("slow_antecedent_scores"):
       slow_antecedent_scores = util.ffnn(pair_emb, self.config["ffnn_depth"], self.config["ffnn_size"], 1, self.dropout) # [k, c, 1]
