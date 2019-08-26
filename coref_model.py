@@ -307,12 +307,13 @@ class CorefModel(object):
     candidate_mention_scores = tf.squeeze(candidate_mention_scores, 1) # [k]
 
     k = tf.to_int32(tf.floor(tf.to_float(tf.shape(context_outputs)[0]) * self.config["top_span_ratio"]))
-    top_span_indices = coref_ops.extract_spans(tf.expand_dims(candidate_mention_scores, 0),
-                                               tf.expand_dims(candidate_starts, 0),
-                                               tf.expand_dims(candidate_ends, 0),
-                                               tf.expand_dims(k, 0),
-                                               util.shape(context_outputs, 0),
-                                               True) # [1, k]
+    top_span_indices = self.extract_spans(candidate_mention_scores, candidate_starts, candidate_ends, k)
+    # top_span_indices = coref_ops.extract_spans(tf.expand_dims(candidate_mention_scores, 0),
+    #                                            tf.expand_dims(candidate_starts, 0),
+    #                                            tf.expand_dims(candidate_ends, 0),
+    #                                            tf.expand_dims(k, 0),
+    #                                            util.shape(context_outputs, 0),
+    #                                            True) # [1, k]
     top_span_indices.set_shape([1, None])
     top_span_indices = tf.squeeze(top_span_indices, 0) # [k]
 
