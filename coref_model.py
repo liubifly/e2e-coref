@@ -358,6 +358,11 @@ class CorefModel(object):
 
     return [candidate_starts, candidate_ends, candidate_mention_scores, top_span_starts, top_span_ends, top_antecedents, top_antecedent_scores], loss
 
+  def extract_spans(self, candidate_mention_scores, candidate_starts, candidate_ends, k):
+    sorted_indices = tf.argsort(candidate_mention_scores, axis=0, direction='DESCENDING')
+    top_span_indices = sorted_indices[: k]
+    return top_span_indices
+
   def get_span_emb(self, head_emb, context_outputs, span_starts, span_ends):
     span_emb_list = []
 
