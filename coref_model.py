@@ -317,6 +317,7 @@ class CorefModel(object):
                                                True) # [1, k]
     top_span_indices.set_shape([1, None])
     top_span_indices = tf.squeeze(top_span_indices, 0) # [k]
+    self.tmp2 = top_span_indices
 
     top_span_starts = tf.gather(candidate_starts, top_span_indices) # [k]
     top_span_ends = tf.gather(candidate_ends, top_span_indices) # [k]
